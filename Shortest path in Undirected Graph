@@ -1,0 +1,35 @@
+ vector<int> shortestPath(vector<vector<int>>& edges, int N,int M, int src){
+        vector<vector<int>>adj(N+1); //creating a adjacency list
+
+        for(auto &x:edges) //creating a undirected graph
+        {
+            adj[x[0]].push_back(x[1]);
+            adj[x[1]].push_back(x[0]);
+        }
+        queue<int>pq; //creating a queue
+        pq.push(src);
+         vector<int>dist(N,INT_MAX); //caluculating distance matrix with INT_MAX as initial
+        dist[src]=0;
+        while(!pq.empty())
+        {
+            int node=pq.front();
+            pq.pop();
+            for(auto &x:adj[node])
+            {
+                if(dist[x]>dist[node]+1) //updating distances
+                {
+                    dist[x]=dist[node]+1;
+                    pq.push(x);
+                }
+            }
+        }
+        if(auto &x:dist)
+        {
+            if(x==INT_MAX)
+            {
+                X=-1; //node is unreachable
+            }
+            
+        }
+        return dist;
+    }
