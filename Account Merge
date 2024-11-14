@@ -1,0 +1,176 @@
+string find(string s,map<int,int>&p)
+        {
+            return p[s]==s?s:find(p[s],p);
+        }
+        
+    vector<vector<string>> accountsMerge(vector<vector<string>> &accounts) {
+      map<string,string>owner;
+      map<string,string>parent;
+      map<string,set<string>>unions;
+      for(int i=0;i<accounts.size();i++)
+      {
+          for(int j=1;j<accounts[i].size();j++)
+          {
+              parents[accounts[i][j]]=accounts[i][j];
+              owner[accounts[i][j]]=accounts[i][0];
+              
+          }
+      }
+      for(int i=0;i<accounts.size();i++)
+      {
+          string p=find(accounts[i][1],parents);
+          for(int j=2;j<accounts[i].size();j++)
+          {
+              parents[find(accounts[i][j],parents)]=p;
+          }
+      }
+      for (int i = 0; i < accounts.size(); i++) {
+        for (int j = 1; j < accounts[i].size(); j++) {
+            unions[find(accounts[i][j], parents)].insert(accounts[i][j]);
+        }
+    }
+    vector<vector<string>> ans;
+    for (pair<string, set<string>> p : unions) {
+        vector<string> res(p.second.begin(), p.second.end()); 
+        res.insert(res.begin(), owner[p.first]); 
+        ans.push_back(res);
+    }
+
+    return ans;
+    }
+
+// ### Explanation with Example
+
+// The code aims to merge email accounts by grouping them under common parent accounts using the **union-find** (also called **disjoint-set**) data structure. The process involves two main parts:
+// 1. **Find operation**: Identifies the parent (or representative) for each email.
+// 2. **Union operation**: Merges email accounts based on shared domains or owners.
+
+// ### Step-by-Step Process:
+
+// #### Input:
+// Consider the following input accounts data:
+// ```cpp
+// vector<vector<string>> accounts = {
+//     {"John", "john1@mail.com", "john2@mail.com"},
+//     {"John", "john3@mail.com"},
+//     {"Mary", "mary1@mail.com", "john2@mail.com"},
+//     {"Mary", "mary2@mail.com"}
+// };
+// ```
+
+// - Account 1: John has two emails: "john1@mail.com" and "john2@mail.com".
+// - Account 2: John has an additional email: "john3@mail.com".
+// - Account 3: Mary has two emails: "mary1@mail.com" and "john2@mail.com".
+// - Account 4: Mary has an additional email: "mary2@mail.com".
+
+// We want to merge accounts that have common emails. So the merged accounts should be:
+// 1. **John's account**: "john1@mail.com", "john2@mail.com", "john3@mail.com".
+// 2. **Mary's account**: "mary1@mail.com", "john2@mail.com", "mary2@mail.com".
+
+// ### Code Walkthrough
+
+// #### Step 1: Initialize Maps
+
+// - `owner`: Tracks the owner of each email.
+// - `parents`: Tracks the parent (or representative) of each email.
+// - `unions`: Groups emails by their representative parent.
+
+// #### Step 2: Set Initial Parent and Owner
+
+// Each email starts as its own parent, and we store the account owner (name).
+
+// ```cpp
+// for(int i = 0; i < accounts.size(); i++) {
+//     for(int j = 1; j < accounts[i].size(); j++) {
+//         parents[accounts[i][j]] = accounts[i][j]; // email is its own parent initially
+//         owner[accounts[i][j]] = accounts[i][0]; // store the account owner's name
+//     }
+// }
+// ```
+// This gives:
+// - `parents`: {"john1@mail.com": "john1@mail.com", "john2@mail.com": "john2@mail.com", "john3@mail.com": "john3@mail.com", "mary1@mail.com": "mary1@mail.com", "mary2@mail.com": "mary2@mail.com"}
+// - `owner`: {"john1@mail.com": "John", "john2@mail.com": "John", "john3@mail.com": "John", "mary1@mail.com": "Mary", "mary2@mail.com": "Mary"}
+
+// #### Step 3: Union the Emails
+
+// Next, we union emails that are part of the same account. The `find` function will identify the parent email, and we merge emails to the same parent.
+
+// ```cpp
+// for(int i = 0; i < accounts.size(); i++) {
+//     string p = find(accounts[i][1], parents); // find the parent of the first email
+//     for(int j = 2; j < accounts[i].size(); j++) {
+//         parents[find(accounts[i][j], parents)] = p; // merge subsequent emails under the same parent
+//     }
+// }
+// ```
+// **For Account 1** ("John", "john1@mail.com", "john2@mail.com"):
+// - Initially, "john1@mail.com" and "john2@mail.com" are their own parents.
+// - After union, "john2@mail.com" will have the same parent as "john1@mail.com".
+
+// **For Account 2** ("John", "john3@mail.com"):
+// - "john3@mail.com" has the same parent as "john1@mail.com" and "john2@mail.com".
+
+// **For Account 3** ("Mary", "mary1@mail.com", "john2@mail.com"):
+// - "john2@mail.com" already has the same parent as "john1@mail.com".
+// - After union, "mary1@mail.com" will be grouped with "john2@mail.com".
+
+// **For Account 4** ("Mary", "mary2@mail.com"):
+// - "mary2@mail.com" will now be grouped with "mary1@mail.com", and by extension, "john2@mail.com".
+
+// After the union step, `parents` will look like this:
+// - `parents`: {"john1@mail.com": "john1@mail.com", "john2@mail.com": "john1@mail.com", "john3@mail.com": "john1@mail.com", "mary1@mail.com": "john1@mail.com", "mary2@mail.com": "john1@mail.com"}
+
+// #### Step 4: Group Emails by Parent
+
+// We now group emails under their respective parent.
+
+// ```cpp
+// for(int i = 0; i < accounts.size(); i++) {
+//     for(int j = 1; j < accounts[i].size(); j++) {
+//         unions[find(accounts[i][j], parents)].insert(accounts[i][j]);
+//     }
+// }
+// ```
+// This gives:
+// - `unions`: {
+//     "john1@mail.com" -> {"john1@mail.com", "john2@mail.com", "john3@mail.com", "mary1@mail.com", "mary2@mail.com"}
+// }
+
+// #### Step 5: Prepare the Final Result
+
+// We now prepare the result by sorting the emails under each parent and adding the account owner's name at the front.
+
+// ```cpp
+// vector<vector<string>> ans;
+// for (pair<string, set<string>> p : unions) {
+//     vector<string> res(p.second.begin(), p.second.end()); 
+//     res.insert(res.begin(), owner[p.first]); // add owner's name
+//     ans.push_back(res);
+// }
+// ```
+// The final result is:
+// ```cpp
+// ans = {
+//     {"John", "john1@mail.com", "john2@mail.com", "john3@mail.com", "mary1@mail.com", "mary2@mail.com"}
+// }
+// ```
+
+// #### Step 6: Return the Final Merged Accounts
+
+// ```cpp
+// return ans;
+// ```
+
+// ### Final Output:
+// ```cpp
+// {
+//     {"John", "john1@mail.com", "john2@mail.com", "john3@mail.com"},
+//     {"Mary", "mary1@mail.com", "mary2@mail.com", "john2@mail.com"}
+// }
+// ```
+
+// ### Conclusion:
+
+// - Emails belonging to the same account (or person) are merged together.
+// - The union-find algorithm helps group them under a common representative parent.
+// - The output is a list of merged email accounts, each with the owner’s name and sorted emails.
